@@ -1,0 +1,98 @@
+import json as json_lib
+import unittest
+from unittest.mock import patch
+
+from EmotionDetection.emotion_detection import emotion_detector
+
+
+class MockResponse:
+    def __init__(self, text):
+        self.text = text
+
+
+class TestEmotionDetection(unittest.TestCase):
+    def _mock_post(self, url, headers=None, json=None):
+        text_to_analyze = json["raw_document"]["text"]
+
+        emotion_payload_map = {
+            "I am glad this happened": {
+                "anger": 0.01,
+                "disgust": 0.01,
+                "fear": 0.01,
+                "joy": 0.96,
+                "sadness": 0.01,
+            },
+            "I am really mad about this": {
+                "anger": 0.95,
+                "disgust": 0.01,
+                "fear": 0.01,
+                "joy": 0.01,
+                "sadness": 0.02,
+            },
+            "I feel disgusted just hearing about this": {
+                "anger": 0.01,
+                "disgust": 0.95,
+                "fear": 0.01,
+                "joy": 0.01,
+                "sadness": 0.02,
+            },
+            "I am so sad about this": {
+                "anger": 0.01,
+                "disgust": 0.01,
+                "fear": 0.01,
+                "joy": 0.01,
+                "sadness": 0.96,
+            },
+            "I am really afraid that this will happen": {
+                "anger": 0.01,
+                "disgust": 0.01,
+                "fear": 0.96,
+                "joy": 0.01,
+                "sadness": 0.01,
+            },
+        }
+
+        payload = {
+            "emotionPredictions": [
+                {"emotion": emotion_payload_map[text_to_analyze]}
+            ]
+        }
+        return MockResponse(json_lib.dumps(payload))
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_joy_statement(self, mock_post):
+        mock_post.side_effect = self._mock_post_with_json
+        result = emotion_detector("I am glad this happened")
+        self.assertEqual(result["dominant_emotion"], "joy")
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_anger_statement(self, mock_post):
+        mock_post.side_effect = self._mock_post_with_json
+        result = emotion_detector("I am really mad about this")
+        self.assertEqual(result["dominant_emotion"], "anger")
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_disgust_statement(self, mock_post):
+        mock_post.side_effect = self._mock_post_with_json
+        result = emotion_detector("I feel disgusted just hearing about this")
+        self.assertEqual(result["dominant_emotion"], "disgust")
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_sadness_statement(self, mock_post):
+        mock_post.side_effect = self._mock_post_with_json
+        result = emotion_detector("I am so sad about this")
+        self.assertEqual(result["dominant_emotion"], "sadness")
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_fear_statement(self, mock_post):
+        mock_post.side_effect = self._mock_post_with_json
+        result = emotion_detector("I am really afraid that this will happen")
+        self.assertEqual(result["dominant_emotion"], "fear")
+
+    def _mock_post_with_json(self, url, headers=None, json=None):
+        # Keep unittest patch side effects simple while preserving request shape.
+        return self._mock_post(url, headers=headers, json=json)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -10,7 +10,14 @@ def emotion_detector(text_to_analyze):
     }
     payload = {"raw_document": {"text": text_to_analyze}}
 
-    response = requests.post(url, headers=headers, json=payload)
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+        return None
+
+    if response.status_code == 400:
+        return None
+
     formatted_response = json.loads(response.text)
 
     emotion_data = (
