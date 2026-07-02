@@ -1,0 +1,11 @@
+$ python3
+Python 3.9.x (...)
+>>> from emotion_detection import emotion_detector
+>>> emotion_detector("I love this new technology.")
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='sn-watson-emotion.labs.skills.network', port=443): Max retries exceeded with url: /v1/watson.runtime.nlp.v1/NlpService/EmotionPredict (Caused by NewConnectionError("HTTPSConnection(host='sn-watson-emotion.labs.skills.network', port=443): Failed to establish a new connection: [Errno 60] Operation timed out"))
+
+# Verification run output from terminal
+IMPORT_OK
+RESULT_START
+(Connection timed out before remote response)
+RESULT_END

@@ -1,0 +1,20 @@
+# Python shell test with required sentence
+
+## Live endpoint attempt
+$ python3
+Python 3.9.x (...)
+>>> from emotion_detection import emotion_detector
+>>> emotion_detector("I am so happy I am doing this.")
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='sn-watson-emotion.labs.skills.network', port=443): Max retries exceeded with url: /v1/watson.runtime.nlp.v1/NlpService/EmotionPredict (Caused by NewConnectionError("HTTPSConnection(host='sn-watson-emotion.labs.skills.network', port=443): Failed to establish a new connection: [Errno 60] Operation timed out"))
+
+## Logic verification output (mocked response payload)
+$ python3 - <<'PY'
+import emotion_detection
+class MockResponse:
+    text = '{"emotionPredictions":[{"emotion":{"anger":0.01,"disgust":0.02,"fear":0.03,"joy":0.91,"sadness":0.03}}]}'
+def mock_post(url, headers=None, json=None):
+    return MockResponse()
+emotion_detection.requests.post = mock_post
+print(emotion_detection.emotion_detector("I am so happy I am doing this."))
+PY
+{'anger': 0.01, 'disgust': 0.02, 'fear': 0.03, 'joy': 0.91, 'sadness': 0.03, 'dominant_emotion': 'joy'}
